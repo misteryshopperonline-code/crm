@@ -1,6 +1,6 @@
 # Pulso CRM
 
-Primera iteración de un CRM visual de seguimiento comercial, adaptable por configuración. Node.js 24+, sin dependencias externas.
+Primera iteración de un CRM independiente de seguimiento comercial, visual y adaptable por configuración. Pulso administra sus propios datos, usuarios, reglas y comunicaciones; no depende de Zoho ni contempla integrarlo en el alcance actual. Node.js 24+, sin dependencias externas.
 
 ## Ejecutar
 
@@ -23,9 +23,9 @@ Abrir http://127.0.0.1:4310. Pruebas: `npm test`.
 
 ## Alcance de esta iteración
 
-Aplicación local de un solo espacio, sin autenticación ni roles; escucha exclusivamente en loopback. No desplegar como aplicación multiusuario hasta añadir autenticación, autorización, aislamiento entre negocios, migraciones, copias de seguridad y gestión segura de secretos. Los responsables son texto libre en esta iteración. Las automatizaciones necesitan el proceso encendido. No existe sincronización con Zoho todavía.
+Aplicación local de un solo espacio, sin autenticación ni roles; escucha exclusivamente en loopback. No desplegar como aplicación multiusuario hasta añadir autenticación, autorización, aislamiento entre negocios, migraciones, copias de seguridad y gestión segura de secretos. Los responsables son texto libre en esta iteración. Las automatizaciones necesitan el proceso encendido.
 
-La siguiente iteración debe definir si Zoho será la fuente principal de datos o un conector opcional. Después: identidad/equipo, primer canal con OAuth y webhooks verificados, envíos con consentimiento e idempotencia, y constructor de workflows.
+Próximas iteraciones: identidad y equipo con roles propios; conexiones directas con proveedores de correo, WhatsApp, SMS, RCS y telefonía; envíos con consentimiento e idempotencia; y constructor de automatizaciones. Pulso será la fuente principal de datos y el responsable de ejecutar las reglas de seguimiento.
 
 ## Control de cambios
 
