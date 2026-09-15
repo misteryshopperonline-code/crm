@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import { LeadNotifications } from './lead-notifications';
 import { usePathname } from 'next/navigation';
 import { useState, type ReactNode } from 'react';
 import { roleNames } from '@/domain/models';
@@ -87,7 +88,7 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
           <span>
             Espacio comercial <b>/</b> {current?.label}
           </span>
-          <span className="local">Edición local</span>
+          <LeadNotifications />
         </header>
         <section>
           {current?.admin && user.role !== 'admin' ? (

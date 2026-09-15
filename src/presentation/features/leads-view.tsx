@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { leadPriority, matchesAttention, type AttentionGroup } from '@/domain/lead-priority';
 import { urgency, type Urgency } from '@/domain/leads';
 import type { Lead } from '@/domain/models';
 import { useCrm } from '../hooks/crm-context';
@@ -14,16 +15,22 @@ const metrics: [Urgency, string, string, string][] = [
 export function LeadsView({ directory = false }: { directory?: boolean }) {
   const { data } = useCrm(),
     [filter, setFilter] = useState<Urgency | 'all'>('all'),
-    [search, setSearch] = useState('');
+    [search, setSearch] = useState(''),
+    [attention, setAttention] = useState<AttentionGroup>('all');
   const [editor, setEditor] = useState<{ type: 'lead' | 'reassign'; lead?: Lead } | null>(null);
   const list = data.leads
     .filter(
       (lead) =>
         (directory || urgency(lead) !== 'closed') &&
+        matchesAttention(lead, attention) &&
         (filter === 'all' || urgency(lead) === filter) &&
         `${lead.name} ${lead.company} ${lead.owner}`.toLowerCase().includes(search.toLowerCase()),
     )
-    .sort((a, b) => Date.parse(a.due) - Date.parse(b.due));
+    .sort(
+      (a, b) =>
+        leadPriority(b).score - leadPriority(a).score ||
+        (Date.parse(a.due) || 0) - (Date.parse(b.due) || 0),
+    );
   const filters: [Urgency | 'all', string][] = [
     ['all', 'Todos'],
     ['overdue', 'Vencidos'],
@@ -43,6 +50,43 @@ export function LeadsView({ directory = false }: { directory?: boolean }) {
           </button>
         }
       />
+      <div className="attention-toolbar" aria-label="Tipo de seguimiento">
+        {(
+          [
+            ['all', 'Todos los seguimientos'],
+            ['weekend', 'Fin de semana sin gestionar'],
+            ['first', 'Sin primera gestión'],
+            ['followup', 'Ya gestionados'],
+          ] as [AttentionGroup, string][]
+        ).map(([key, label]) => (
+          <button
+            key={key}
+            aria-pressed={attention === key}
+            onClick={() => {
+              setAttention(key);
+              setFilter('all');
+            }}
+          >
+            {label}{' '}
+            <strong>
+              {
+                data.leads.filter(
+                  (lead) => urgency(lead) !== 'closed' && matchesAttention(lead, key),
+                ).length
+              }
+            </strong>
+          </button>
+        ))}
+      </div>
+      <details className="priority-explanation">
+        <summary>¿Cómo se ordenan las prioridades?</summary>
+        <p>
+          50 puntos por vencimiento o falta de próximo paso; 30 por llegada en fin de semana sin
+          gestión; 20 por acción en próximas 24 horas y 20 por más de 48 horas sin gestión; 15 por
+          estado Calificado o Propuesta; 5 por correo y teléfono disponibles. Alta: desde 50; media:
+          desde 20. Calendario: Ecuador continental. Los cerrados no generan alertas.
+        </p>
+      </details>
       <div className="metrics">
         {metrics.map(([key, title, description, color]) => (
           <button
@@ -96,6 +140,16 @@ export function LeadsView({ directory = false }: { directory?: boolean }) {
                 <span className="avatar">{lead.name.slice(0, 2).toUpperCase()}</span>
                 <div>
                   <h3>{lead.name}</h3>
+                  <span
+                    className={`priority-badge priority-${leadPriority(lead).label.toLowerCase()}`}
+                    title={leadPriority(lead).reasons.join(' · ')}
+                  >
+                    Prioridad {leadPriority(lead).label.toLowerCase()} · {leadPriority(lead).score}
+                  </span>
+                  <p>
+                    {leadPriority(lead).managed ? 'Ya gestionado' : 'Sin primera gestión'}
+                    {leadPriority(lead).weekend ? ' · Llegó en fin de semana' : ''}
+                  </p>
                   <p>
                     {lead.company || 'Contacto individual'} · {lead.stage}
                   </p>
@@ -148,6 +202,7 @@ export function LeadsView({ directory = false }: { directory?: boolean }) {
                 onClick={() => {
                   setSearch('');
                   setFilter('all');
+                  setAttention('all');
                 }}
               >
                 Limpiar búsqueda y filtros

@@ -39,3 +39,13 @@ Todo lead abierto tiene responsable, próxima acción y fecha. Registrar una ges
 5. Configuración de etapas, campos y reglas por negocio.
 
 Cada integración debe conservar identificadores externos, evitar envíos duplicados y mostrar su estado real. Actualmente los canales solo guardan referencias de configuración y no envían ni reciben mensajes.
+
+## Notificaciones y prioridad de seguimiento
+
+La cabecera muestra alertas internas para los leads visibles según el rol. Desde una alerta se abre el formulario de gestión; las alertas se recalculan al guardar y durante la actualización de la vista (cada minuto mientras está visible y no se está editando). No son mensajes por correo ni notificaciones del sistema operativo. No hay estado de lectura: permanecen hasta resolver su causa.
+
+La agenda permite separar pendientes de fin de semana, leads sin primera gestión y leads ya gestionados. El fin de semana usa sábado y domingo según `America/Guayaquil`, con la fecha de creación registrada; no desaparece al llegar el lunes. Una gestión registrada, o el estado Contactado/Calificado/Propuesta, identifica continuidad de seguimiento; un intento no prueba que el cliente haya respondido.
+
+La prioridad suma: 50 por compromiso vencido o próximo paso ausente; 30 por fin de semana sin gestión; 20 por acción en menos de 24 horas; 20 por espera de al menos 48 horas desde la creación o última gestión; 15 por estado Calificado/Propuesta; 5 por disponer de correo y teléfono. Alta desde 50, media desde 20, normal por debajo. Los cerrados no generan alertas. La puntuación ordena la lista y muestra sus motivos al consultar las notificaciones o el indicador de prioridad.
+
+Esta versión usa campos existentes y reglas fijas visibles en la agenda. No infiere presupuesto, intención de compra ni calidad personal. Quedan pendientes reglas editables por negocio y calendario configurable.

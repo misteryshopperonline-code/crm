@@ -965,3 +965,73 @@ dialog {
     transition: none;
   }
 }
+
+.attention-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.attention-toolbar button[aria-pressed='true'] {
+  background: #e9f1ec;
+  border-color: #2d674f;
+}
+.attention-toolbar strong {
+  margin-left: 8px;
+  font-variant-numeric: tabular-nums;
+}
+.priority-explanation {
+  margin-bottom: 24px;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+.priority-explanation summary {
+  cursor: pointer;
+  padding: 10px 0;
+}
+.priority-explanation p {
+  max-width: 75ch;
+}
+.priority-badge {
+  display: inline-block;
+  padding: 4px 7px;
+  margin-top: 6px;
+  border-radius: 5px;
+  font-size: 0.75rem;
+  background: #edf3ef;
+  color: #345240;
+}
+.priority-alta {
+  background: #faeae4;
+  color: #8c3529;
+}
+.priority-media {
+  background: #f9f0d9;
+  color: #745710;
+}
+.notification-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.notification-trigger strong {
+  background: #e9f1ec;
+  border-radius: 5px;
+  padding: 3px 7px;
+}
+.notification-item {
+  width: 100%;
+  text-align: left;
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 16px;
+}
+.notification-item span {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.notification-item strong {
+  overflow-wrap: anywhere;
+}
