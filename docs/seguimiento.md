@@ -10,17 +10,17 @@ Todo lead abierto tiene responsable, próxima acción y fecha. Registrar una ges
 
 ## Campos actuales
 
-| Campo | Uso |
-|---|---|
-| name / company | Contacto y empresa |
-| owner | Nombre del responsable; `ownerId` referencia al usuario real |
-| email / phone | Medios de contacto |
-| stage | Estado comercial |
-| channel | Canal preferido |
-| action / due | Próxima acción y fecha |
-| last / attempts | Última gestión y contador |
-| escalation | Nivel de escalamiento operativo |
-| history | Resultado, responsable y fecha de cada gestión |
+| Campo           | Uso                                                          |
+| --------------- | ------------------------------------------------------------ |
+| name / company  | Contacto y empresa                                           |
+| owner           | Nombre del responsable; `ownerId` referencia al usuario real |
+| email / phone   | Medios de contacto                                           |
+| stage           | Estado comercial                                             |
+| channel         | Canal preferido                                              |
+| action / due    | Próxima acción y fecha                                       |
+| last / attempts | Última gestión y contador                                    |
+| escalation      | Nivel de escalamiento operativo                              |
+| history         | Resultado, responsable y fecha de cada gestión               |
 
 ## Reglas implementadas
 
