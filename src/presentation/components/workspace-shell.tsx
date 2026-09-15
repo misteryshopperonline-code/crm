@@ -24,6 +24,9 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
     current = navigation.find((item) => item.path === path);
   return (
     <>
+      <a className="skip-link" href="#main-content">
+        Ir al contenido
+      </a>
       <aside>
         <Link className="brand" href="/agenda">
           ▥ <strong>pulso</strong>
@@ -34,7 +37,7 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
           <div>{data.settings.business}</div>
         </div>
         <div className="nav-label">ESPACIO DE TRABAJO</div>
-        <nav>
+        <nav aria-label="Navegación principal">
           {navigation
             .filter((item) => !item.admin || user.role === 'admin')
             .map((item) => (
@@ -44,7 +47,7 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
                 className={path === item.path ? 'active' : ''}
                 aria-current={path === item.path ? 'page' : undefined}
               >
-                <span>{item.icon}</span>
+                <span aria-hidden="true">{item.icon}</span>
                 {item.label}
                 {item.path === '/agenda' && (
                   <small>
@@ -78,7 +81,7 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
           </div>
         </div>
       </aside>
-      <main>
+      <main id="main-content" tabIndex={-1}>
         <header>
           <span>
             Espacio comercial <b>/</b> {current?.label}

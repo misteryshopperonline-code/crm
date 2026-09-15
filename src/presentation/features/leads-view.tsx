@@ -29,6 +29,7 @@ export function LeadsView({ directory = false }: { directory?: boolean }) {
     ['overdue', 'Vencidos'],
     ['today', 'Próximas 24 h'],
     ['upcoming', 'Programados'],
+    ['missing', 'Sin próxima acción'],
     ...(directory ? [['closed', 'Cerrados'] as [Urgency, string]] : []),
   ];
   return (
@@ -68,6 +69,7 @@ export function LeadsView({ directory = false }: { directory?: boolean }) {
           <p>Una gestión completa siempre deja el siguiente paso definido.</p>
         </div>
         <input
+          type="search"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Buscar lead, empresa o ejecutivo"
@@ -141,9 +143,20 @@ export function LeadsView({ directory = false }: { directory?: boolean }) {
                 ? 'Cambia los filtros para ver otras oportunidades.'
                 : 'Crea tu primer contacto con responsable y próximo paso.'}
             </p>
-            <button className="primary" onClick={() => setEditor({ type: 'lead' })}>
-              + Crear lead
-            </button>
+            {data.leads.length ? (
+              <button
+                onClick={() => {
+                  setSearch('');
+                  setFilter('all');
+                }}
+              >
+                Limpiar búsqueda y filtros
+              </button>
+            ) : (
+              <button className="primary" onClick={() => setEditor({ type: 'lead' })}>
+                + Crear lead
+              </button>
+            )}
           </div>
         )}
       </div>

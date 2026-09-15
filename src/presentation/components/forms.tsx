@@ -43,6 +43,7 @@ export function AsyncForm({
     [pending, setPending] = useState(false);
   return (
     <form
+      aria-busy={pending}
       onSubmit={async (event) => {
         event.preventDefault();
         if (pending) return;

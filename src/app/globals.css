@@ -1,4 +1,6 @@
 :root {
+  --text-secondary: #596f62;
+  --focus-color: #2d674f;
   font-family:
     Inter,
     -apple-system,
@@ -36,13 +38,16 @@ button:hover {
   background: #eef5f1;
 }
 button:focus-visible,
-a:focus-visible {
-  outline: 3px solid #538b75;
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--focus-color);
   outline-offset: 3px;
 }
 button:disabled {
   opacity: 0.5;
-  cursor: wait;
+  cursor: not-allowed;
 }
 aside {
   position: fixed;
@@ -53,6 +58,7 @@ aside {
   padding: 34px 20px;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 .brand {
   text-decoration: none;
@@ -96,7 +102,7 @@ aside {
 .nav-label {
   font-size: 0.65rem;
   letter-spacing: 1.5px;
-  color: #8c9992;
+  color: var(--text-secondary);
   margin: 0 9px 16px;
 }
 nav {
@@ -136,7 +142,7 @@ nav small {
 }
 .sidebar-bottom small {
   display: block;
-  color: #88968d;
+  color: var(--text-secondary);
   margin-top: 5px;
   font-size: 0.75rem;
 }
@@ -151,7 +157,7 @@ header {
   justify-content: space-between;
   align-items: center;
   padding: 0 42px;
-  color: #819087;
+  color: var(--text-secondary);
   font-size: 0.8rem;
 }
 header b {
@@ -192,7 +198,7 @@ h1 {
   line-height: 1.2;
 }
 p {
-  color: #7b8b81;
+  color: var(--text-secondary);
   font-size: 0.875rem;
   line-height: 1.65;
   margin: 8px 0;
@@ -244,7 +250,7 @@ h3 {
   margin: 20px 0 12px;
 }
 .metric small {
-  color: #829088;
+  color: var(--text-secondary);
   font-size: 0.75rem;
   font-weight: 400;
 }
@@ -273,7 +279,7 @@ h3 {
 }
 .number {
   font-size: 0.75rem;
-  color: #839389;
+  color: var(--text-secondary);
   border: 1px solid #dae4dc;
   padding: 2px 7px;
   border-radius: 5px;
@@ -288,7 +294,7 @@ h3 {
 .filters button {
   background: transparent;
   border-color: transparent;
-  color: #87968c;
+  color: var(--text-secondary);
 }
 .filters .chosen {
   background: white;
@@ -354,7 +360,7 @@ h3 {
 }
 .footnote {
   font-size: 0.75rem;
-  color: #91a097;
+  color: var(--text-secondary);
   margin-top: 20px;
 }
 .grid {
@@ -421,7 +427,7 @@ h3 {
 .note {
   font-size: 0.875rem;
   line-height: 1.8;
-  color: #7c8d82;
+  color: var(--text-secondary);
   margin-top: 28px;
   max-width: 900px;
 }
@@ -502,7 +508,7 @@ form > .primary {
   color: #50695a;
 }
 .history small {
-  color: #8b998f;
+  color: var(--text-secondary);
 }
 #toast {
   position: fixed;
@@ -686,7 +692,7 @@ form > .primary {
 }
 .auth-note {
   font-size: 0.75rem;
-  color: #8d9b93;
+  color: var(--text-secondary);
   margin-top: 24px;
   border-top: 1px solid #e9eee9;
   padding-top: 20px;
@@ -767,7 +773,7 @@ form > .primary {
   color: #53705e;
 }
 .audit-list small {
-  color: #8c9c92;
+  color: var(--text-secondary);
 }
 .lead-actions {
   display: grid;
@@ -867,4 +873,90 @@ nav a:hover {
 }
 .panel strong {
   overflow-wrap: anywhere;
+}
+
+/* Shared interaction and content resilience. */
+::selection {
+  background: #d5e8dc;
+  color: #233e38;
+}
+input,
+textarea {
+  caret-color: var(--focus-color);
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-secondary);
+  opacity: 1;
+}
+.metric strong,
+.number,
+.deadline,
+nav small {
+  font-variant-numeric: tabular-nums;
+}
+.workspace > div,
+.person > div,
+.lead-row > div,
+.panel,
+.title > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.skip-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 20;
+  padding: 12px 18px;
+  background: #fff;
+  color: var(--focus-color);
+  transform: translateY(-180%);
+}
+.skip-link:focus {
+  transform: translateY(0);
+}
+.close {
+  min-width: 44px;
+  min-height: 44px;
+}
+dialog {
+  overscroll-behavior: contain;
+}
+@media (max-width: 700px) {
+  button,
+  nav a,
+  .text-button {
+    min-height: 44px;
+  }
+  input,
+  select,
+  textarea {
+    font-size: 1rem;
+  }
+  header {
+    height: auto;
+    min-height: 55px;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding-block: 12px;
+  }
+  .lead-row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .lead-row .person,
+  .lead-actions {
+    grid-column: 1 / -1;
+  }
+  .lead-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  #toast {
+    transition: none;
+  }
 }
