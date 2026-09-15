@@ -6,14 +6,15 @@ import { roleNames } from '@/domain/models';
 import { urgency } from '@/domain/leads';
 import { useCrm } from '../hooks/crm-context';
 import { AsyncForm, Field, Modal, values } from './forms';
-const navigation = [
-  { path: '/agenda', label: 'Mi día', icon: '◷' },
-  { path: '/leads', label: 'Leads', icon: '▤' },
-  { path: '/equipo', label: 'Equipo', icon: '♙' },
-  { path: '/plantillas', label: 'Plantillas', icon: '▧' },
-  { path: '/automatizaciones', label: 'Automatizaciones', icon: '⚡', admin: true },
-  { path: '/canales', label: 'Canales', icon: '⇄', admin: true },
-  { path: '/configuracion', label: 'Configuración', icon: '⚙', admin: true },
+import { NavigationIcon, type NavigationIconName } from './navigation-icon';
+const navigation: { path: string; label: string; icon: NavigationIconName; admin?: boolean }[] = [
+  { path: '/agenda', label: 'Mi día', icon: 'agenda' },
+  { path: '/leads', label: 'Leads', icon: 'leads' },
+  { path: '/equipo', label: 'Equipo', icon: 'equipo' },
+  { path: '/plantillas', label: 'Plantillas', icon: 'plantillas' },
+  { path: '/automatizaciones', label: 'Automatizaciones', icon: 'automatizaciones', admin: true },
+  { path: '/canales', label: 'Canales', icon: 'canales', admin: true },
+  { path: '/configuracion', label: 'Configuración', icon: 'configuracion', admin: true },
 ];
 export function WorkspaceShell({ children }: { children: ReactNode }) {
   const { data, mutate, logout } = useCrm(),
@@ -47,7 +48,7 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
                 className={path === item.path ? 'active' : ''}
                 aria-current={path === item.path ? 'page' : undefined}
               >
-                <span aria-hidden="true">{item.icon}</span>
+                <NavigationIcon name={item.icon} />
                 {item.label}
                 {item.path === '/agenda' && (
                   <small>

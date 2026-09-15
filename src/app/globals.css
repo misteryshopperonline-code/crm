@@ -119,9 +119,14 @@ nav a {
   color: #6c7d74;
   background: transparent;
 }
-nav a span {
-  font-size: 1.2rem;
-  width: 20px;
+.navigation-icon {
+  flex-shrink: 0;
+}
+nav a.active {
+  --icon-surface: #e9f1ec;
+}
+nav a:hover {
+  --icon-surface: #eef5f1;
 }
 nav a.active {
   background: #e9f1ec;
@@ -584,8 +589,8 @@ form > .primary {
     white-space: nowrap;
     padding: 10px;
   }
-  nav a span {
-    display: none;
+  nav a {
+    gap: 8px;
   }
   main {
     margin: 0;
