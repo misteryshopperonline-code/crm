@@ -1,6 +1,6 @@
 # Pulso CRM
 
-Primera iteración de un CRM independiente de seguimiento comercial, visual y adaptable por configuración. Pulso administra sus propios datos, usuarios, reglas y comunicaciones; no depende de Zoho ni contempla integrarlo en el alcance actual. Node.js 24+, sin dependencias externas.
+CRM independiente de seguimiento comercial, visual y adaptable por configuración. Pulso administra sus propios datos, usuarios, reglas y comunicaciones; no depende de Zoho ni contempla integrarlo en el alcance actual. Node.js 24+, sin dependencias externas.
 
 ## Ejecutar
 
@@ -10,7 +10,7 @@ npm start
 
 Abrir http://127.0.0.1:4310. Pruebas: `npm test`.
 
-## Funcionalidad incluida
+## Funcionalidad incluida (v0.2)
 
 - Agenda de vencidos, próximas 24 horas, programados y sin próxima acción; búsqueda por nombre, empresa y ejecutivo.
 - Creación de leads, prevención de duplicados por correo/teléfono y registro de gestiones con historial.
@@ -19,13 +19,18 @@ Abrir http://127.0.0.1:4310. Pruebas: `npm test`.
 - Automatizaciones activables: primer contacto con SLA y escalamiento visual periódico por vencimiento.
 - Configuración de negocio, sector, SLA y campos adicionales obligatorios.
 - Preparación de proveedor/cuenta para correo, WhatsApp, SMS, RCS y telefonía. No hay conectores activos aún.
+- Inicio de sesión, invitaciones de un solo uso, equipos y roles de administrador, supervisor y ejecutivo.
+- Acceso a leads controlado en servidor por usuario/equipo, reasignación con motivo y auditoría administrativa.
+- Cambio de contraseña, sesiones revocables y desactivación con protección de leads asignados.
 - Persistencia SQLite en `data/crm.sqlite`, excluida de Git.
 
 ## Alcance de esta iteración
 
-Aplicación local de un solo espacio, sin autenticación ni roles; escucha exclusivamente en loopback. No desplegar como aplicación multiusuario hasta añadir autenticación, autorización, aislamiento entre negocios, migraciones, copias de seguridad y gestión segura de secretos. Los responsables son texto libre en esta iteración. Las automatizaciones necesitan el proceso encendido.
+Aplicación local de un solo espacio con autenticación y roles; escucha exclusivamente en loopback. En la primera apertura, crea tu cuenta de administrador; después usa **Equipo** para organizar personas e invitarlas. No hay credenciales predeterminadas. Los registros previos se conservan y pasan al administrador para reasignación. Consulta [Usuarios y permisos](docs/usuarios-y-permisos.md).
 
-Próximas iteraciones: identidad y equipo con roles propios; conexiones directas con proveedores de correo, WhatsApp, SMS, RCS y telefonía; envíos con consentimiento e idempotencia; y constructor de automatizaciones. Pulso será la fuente principal de datos y el responsable de ejecutar las reglas de seguimiento.
+Los enlaces de invitación funcionan en este mismo equipo, sin envío de correo. Para acceso remoto quedan pendientes despliegue HTTPS, recuperación de acceso y copias de seguridad operativas. No es multiempresa. Las automatizaciones necesitan el proceso encendido.
+
+Próximas iteraciones: conexiones directas con proveedores de correo, WhatsApp, SMS, RCS y telefonía; envíos con consentimiento e idempotencia; constructor de automatizaciones. Pulso es la fuente principal de datos y ejecuta las reglas de seguimiento.
 
 ## Control de cambios
 
