@@ -13,7 +13,7 @@ Todo lead abierto tiene responsable, próxima acción y fecha. Registrar una ges
 | Campo | Uso |
 |---|---|
 | name / company | Contacto y empresa |
-| owner | Ejecutivo responsable; texto en esta iteración, usuario con ID en la siguiente |
+| owner | Nombre del responsable; `ownerId` referencia al usuario real |
 | email / phone | Medios de contacto |
 | stage | Estado comercial |
 | channel | Canal preferido |
@@ -32,7 +32,7 @@ Todo lead abierto tiene responsable, próxima acción y fecha. Registrar una ges
 
 ## Siguientes funcionalidades
 
-1. Usuarios, equipos y permisos propios; acceso de ejecutivo y supervisor.
+1. Implementado en v0.2: usuarios, equipos y permisos propios; acceso de ejecutivo, supervisor y administrador. Ver [Usuarios y permisos](usuarios-y-permisos.md).
 2. Conexión directa con el primer proveedor de comunicaciones, autenticación segura y recepción de eventos verificados.
 3. Bandeja de conversaciones vinculada a leads y actividades.
 4. Constructor de automatizaciones con condiciones, acciones, reintentos y registro de ejecución.
