@@ -1,39 +1,75 @@
 # Pulso CRM
 
-CRM independiente de seguimiento comercial, visual y adaptable por configuración. Pulso administra sus propios datos, usuarios, reglas y comunicaciones; no depende de Zoho ni contempla integrarlo en el alcance actual. Node.js 24+, sin dependencias externas.
+CRM independiente de seguimiento comercial. Next.js **16.3.5** (última versión estable verificada en npm el 15 de septiembre de 2026), App Router, React **19.3.0** y TypeScript estricto.
 
 ## Ejecutar
 
+Requiere Node.js 24 y npm. La base local se conserva en `data/crm.sqlite`.
+
 ```sh
+npm ci
+npm run dev
+```
+
+Abrir http://127.0.0.1:4310. Para usar la compilación de producción:
+
+```sh
+npm run build
 npm start
 ```
 
-Abrir http://127.0.0.1:4310. Pruebas: `npm test`.
+Al abrir un espacio nuevo, crea el administrador; no hay credenciales predeterminadas. En **Equipo** se organizan personas, roles e invitaciones. Si ya usabas v0.2, tus usuarios, contraseñas, sesiones y leads se conservan. Antes de abrir la base existente con Next.js se genera `data/crm.before-nextjs.sqlite`.
 
-## Funcionalidad incluida (v0.2)
+## Funcionalidades
 
-- Agenda de vencidos, próximas 24 horas, programados y sin próxima acción; búsqueda por nombre, empresa y ejecutivo.
-- Creación de leads, prevención de duplicados por correo/teléfono y registro de gestiones con historial.
-- Validaciones en servidor: datos básicos, medio de contacto adecuado al canal, próximo paso y fecha futura para leads abiertos.
-- Plantillas de correo editables con variables y vista previa; no envían mensajes.
-- Automatizaciones activables: primer contacto con SLA y escalamiento visual periódico por vencimiento.
-- Configuración de negocio, sector, SLA y campos adicionales obligatorios.
-- Preparación de proveedor/cuenta para correo, WhatsApp, SMS, RCS y telefonía. No hay conectores activos aún.
-- Inicio de sesión, invitaciones de un solo uso, equipos y roles de administrador, supervisor y ejecutivo.
-- Acceso a leads controlado en servidor por usuario/equipo, reasignación con motivo y auditoría administrativa.
-- Cambio de contraseña, sesiones revocables y desactivación con protección de leads asignados.
-- Persistencia SQLite en `data/crm.sqlite`, excluida de Git.
+- Agenda de vencidos, próximas 24 horas, programados y sin próximo paso; búsqueda de leads.
+- Creación, gestión e historial; próximo compromiso obligatorio y prevención de duplicados.
+- Usuarios, equipos, roles de administrador/supervisor/ejecutivo y filtrado en servidor.
+- Invitaciones de un solo uso, cambio de contraseña y sesiones revocables.
+- Reasignación con motivo y auditoría administrativa.
+- Plantillas de correo con variables y vista previa.
+- Primera gestión automática y escalamiento por vencimiento mientras el servidor permanece encendido.
+- Configuración de negocio, SLA, campos obligatorios y referencias de proveedores de comunicaciones.
 
-## Alcance de esta iteración
+## Arquitectura
 
-Aplicación local de un solo espacio con autenticación y roles; escucha exclusivamente en loopback. En la primera apertura, crea tu cuenta de administrador; después usa **Equipo** para organizar personas e invitarlas. No hay credenciales predeterminadas. Los registros previos se conservan y pasan al administrador para reasignación. Consulta [Usuarios y permisos](docs/usuarios-y-permisos.md).
+```text
+src/
+  domain/           Entidades, validaciones y políticas de acceso
+  application/      Casos de uso y puertos de persistencia/seguridad
+  infrastructure/   SQLite, criptografía y composición de dependencias
+  interfaces/http/  Adaptador HTTP, cookies y traducción de errores
+  presentation/     Componentes React, formularios y estado de interfaz
+  app/              Rutas y layouts de Next.js
+```
 
-Los enlaces de invitación funcionan en este mismo equipo, sin envío de correo. Para acceso remoto quedan pendientes despliegue HTTPS, recuperación de acceso y copias de seguridad operativas. No es multiempresa. Las automatizaciones necesitan el proceso encendido.
+El dominio y los casos de uso no importan Next.js, React ni SQLite. Las dependencias se inyectan mediante interfaces. La API conserva las rutas `/api/*` anteriores y la interfaz se divide en páginas de App Router; no existe un servidor HTTP paralelo ni HTML generado por concatenación.
 
-Próximas iteraciones: conexiones directas con proveedores de correo, WhatsApp, SMS, RCS y telefonía; envíos con consentimiento e idempotencia; constructor de automatizaciones. Pulso es la fuente principal de datos y ejecuta las reglas de seguimiento.
+- [Arquitectura y decisiones](docs/arquitectura.md)
+- [Usuarios y permisos](docs/usuarios-y-permisos.md)
+- [Seguimiento](docs/seguimiento.md)
+
+## Verificación
+
+```sh
+npm run lint
+npm run typecheck
+npm run format:check
+npm test
+npm run build
+npm run test:integration
+```
+
+Las pruebas HTTP arrancan Next.js de producción en un puerto temporal con una base aislada. Las pruebas unitarias validan el dominio, los casos de uso con un repositorio en memoria y la compatibilidad transaccional de SQLite. GitHub Actions ejecuta los controles en cada cambio.
+
+TypeScript 6.0.3 se fija por compatibilidad con el analizador oficial de Next.js; TypeScript 7 todavía no es compatible con typescript-eslint de esta versión. Next.js se mantiene en la última versión estable, sin usar canary.
+
+## Alcance
+
+Un negocio por instancia y acceso local. Los canales todavía no envían ni reciben mensajes. Las invitaciones se comparten manualmente y funcionan en el equipo donde se ejecuta Pulso. El acceso remoto, HTTPS, recuperación de contraseña por correo, MFA e integraciones externas quedan para siguientes iteraciones.
+
+`DATA_DIR` permite indicar otra carpeta de persistencia. `PORT` debe coincidir con el puerto del servidor si se inicia con parámetros distintos; Host y Origin se validan contra localhost/127.0.0.1. No cambiar a una interfaz pública sin implementar la configuración de despliegue correspondiente.
 
 ## Control de cambios
 
-Repositorio: https://github.com/misteryshopperonline-code/crm
-
-Una rama `codex/` por funcionalidad; pruebas de las invariantes de negocio y pull request antes de integrar. No versionar datos reales ni credenciales.
+[Repositorio en GitHub](https://github.com/misteryshopperonline-code/crm). Una rama `codex/` y un PR por iteración. Datos, copias de seguridad, secretos y artefactos de compilación quedan excluidos de Git y del trazado de despliegue.

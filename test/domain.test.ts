@@ -1,0 +1,38 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { validateLead, urgency } from '../src/domain/leads';
+const now = Date.now(),
+  settings = { required: [] };
+const lead = {
+  name: 'Prueba',
+  owner: 'Ejecutivo',
+  stage: 'Nuevo',
+  channel: 'Correo',
+  email: 'prueba@example.com',
+  company: '',
+  phone: '',
+  action: 'Contactar',
+  due: new Date(now + 3600000).toISOString(),
+};
+test('acepta un lead con compromiso futuro', () =>
+  assert.deepEqual(validateLead(lead, settings, now), []));
+test('rechaza blancos y siguiente acción ausente', () =>
+  assert.ok(validateLead({ ...lead, name: ' ', action: '', due: '' }, settings, now).length >= 3));
+test('rechaza contacto inválido y canal sin teléfono', () => {
+  assert.ok(validateLead({ ...lead, email: 'invalido' }, settings, now).length);
+  assert.ok(validateLead({ ...lead, channel: 'WhatsApp' }, settings, now).length);
+});
+test('aplica requisitos configurados', () =>
+  assert.ok(validateLead(lead, { required: ['company'] }, now).length));
+test('cerrado no necesita próxima acción', () =>
+  assert.deepEqual(
+    validateLead({ ...lead, stage: 'Ganado', action: '', due: '' }, settings, now),
+    [],
+  ));
+test('rechaza fecha pasada', () =>
+  assert.ok(validateLead({ ...lead, due: new Date(now - 1).toISOString() }, settings, now).length));
+test('clasifica vencidos y excluye cerrados', () => {
+  assert.equal(urgency({ ...lead, due: new Date(now - 1).toISOString() }, now), 'overdue');
+  assert.equal(urgency({ ...lead, stage: 'Ganado' }, now), 'closed');
+  assert.equal(urgency(lead, now), 'today');
+});
