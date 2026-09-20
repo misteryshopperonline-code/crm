@@ -30,6 +30,22 @@ export interface Team {
   id: string;
   name: string;
 }
+export const contactOutcomes = [
+  'Sin respuesta',
+  'Contacto efectivo',
+  'Respuesta recibida',
+  'Datos de contacto incorrectos',
+  'Otra gestión',
+] as const;
+export type ContactOutcome = (typeof contactOutcomes)[number];
+export interface BusinessCalendar {
+  enabled: boolean;
+  timeZone: string;
+  weekdays: number[];
+  startHour: number;
+  endHour: number;
+  holidays: string[];
+}
 export interface Lead {
   id: string;
   name: string;
@@ -47,8 +63,13 @@ export interface Lead {
   attempts: number;
   escalation: number;
   legacyOwner?: string;
+  firstContactAt?: string | null;
+  lastContactAt?: string | null;
+  lastOutcome?: ContactOutcome;
+  firstContactDue?: string;
 }
 export interface Activity {
+  outcome?: ContactOutcome;
   id: string;
   leadId: string;
   date: string;
@@ -63,6 +84,7 @@ export interface EmailTemplate {
   body: string;
 }
 export interface Settings {
+  calendar?: BusinessCalendar;
   business: string;
   industry: string;
   sla: number;
@@ -123,6 +145,7 @@ export interface PublicUser {
   pending: boolean;
 }
 export interface Snapshot extends CrmState {
+  asOf: number;
   currentUser: PublicUser;
   users: PublicUser[];
   teams: Team[];

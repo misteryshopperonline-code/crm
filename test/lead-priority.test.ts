@@ -27,7 +27,12 @@ test('el lunes mantiene visibles los leads del sábado sin gestionar', () => {
   assert.equal(matchesAttention(lead, 'weekend', now), true);
 });
 test('una gestión elimina el pendiente de fin de semana y activa seguimiento', () => {
-  const managed = { ...lead, last: '2026-09-14T14:00:00Z', attempts: 1 };
+  const managed = {
+    ...lead,
+    last: '2026-09-14T14:00:00Z',
+    firstContactAt: '2026-09-14T14:00:00Z',
+    attempts: 1,
+  };
   assert.equal(matchesAttention(managed, 'weekend', now), false);
   assert.equal(matchesAttention(managed, 'followup', now), true);
   assert.equal(leadPriority(managed, now).alert, true);
@@ -56,5 +61,15 @@ test('vencimientos pesan más que datos de contacto completos', () => {
         },
         now,
       ).score,
+  );
+});
+
+test('un intento sin respuesta no confirma contacto', () => {
+  assert.equal(
+    leadPriority(
+      { ...lead, attempts: 4, last: new Date(now).toISOString(), stage: 'Contactado' },
+      now,
+    ).managed,
+    false,
   );
 });

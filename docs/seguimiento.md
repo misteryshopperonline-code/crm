@@ -49,3 +49,13 @@ La agenda permite separar pendientes de fin de semana, leads sin primera gestió
 La prioridad suma: 50 por compromiso vencido o próximo paso ausente; 30 por fin de semana sin gestión; 20 por acción en menos de 24 horas; 20 por espera de al menos 48 horas desde la creación o última gestión; 15 por estado Calificado/Propuesta; 5 por disponer de correo y teléfono. Alta desde 50, media desde 20, normal por debajo. Los cerrados no generan alertas. La puntuación ordena la lista y muestra sus motivos al consultar las notificaciones o el indicador de prioridad.
 
 Esta versión usa campos existentes y reglas fijas visibles en la agenda. No infiere presupuesto, intención de compra ni calidad personal. Quedan pendientes reglas editables por negocio y calendario configurable.
+
+## Contacto efectivo y calendario laboral
+
+Al guardar una gestión se exige un resultado estructurado: Sin respuesta, Contacto efectivo, Respuesta recibida, Datos de contacto incorrectos u Otra gestión. Solo Contacto efectivo y Respuesta recibida registran `firstContactAt` y `lastContactAt`. La primera fecha se conserva en las siguientes gestiones; el resultado queda en el historial. Las notas históricas y el estado comercial no se interpretan como prueba de contacto: los registros anteriores aparecen sin contacto confirmado hasta registrar uno explícitamente.
+
+En Configuración se puede activar el cálculo en horas hábiles, seleccionar zona horaria IANA, días laborables, apertura/cierre en horas enteras y feriados por fecha. Se admite una jornada continua, sin turnos nocturnos ni pausas intermedias. Por compatibilidad, el calendario comienza desactivado; mientras tanto se usan horas transcurridas. El horario sugerido es lunes a viernes, 09:00–18:00, America/Guayaquil.
+
+Los nuevos leads conservan `firstContactDue`, calculado al crearse. Cambiar el calendario no altera ese límite ni los compromisos existentes. Las fechas sugeridas de nuevas gestiones usan el calendario vigente. El vencimiento de un compromiso explícito sigue respetando su fecha exacta. El límite de primer contacto vencido añade 50 puntos mientras no exista contacto efectivo. Las esperas de 48 horas de prioridad pasan a horas hábiles cuando se activa el calendario y se cuentan desde la creación o el último contacto efectivo. Las prioridades usan la hora del servidor.
+
+Estas reglas sustituyen la clasificación anterior basada en intentos/estado comercial y el calendario fijo. Los leads históricos sin límite inicial conservan las alertas de antigüedad y próxima acción, sin inventar un SLA retroactivo.

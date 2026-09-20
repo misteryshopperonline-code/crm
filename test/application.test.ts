@@ -66,10 +66,41 @@ test('use cases operate without Next.js or SQLite and obey an injected clock', (
   now += 49 * 3600000;
   assert.equal(queries.snapshot(user.id).leads[0].escalation, 2);
   assert.throws(
-    () => leads.save(user.id, { ...created, result: '', due: '2026-09-18T12:00:00Z' }),
+    () =>
+      leads.save(user.id, {
+        ...created,
+        result: '',
+        outcome: 'Sin respuesta',
+        due: '2026-09-18T12:00:00Z',
+      }),
     ApplicationError,
   );
   assert.equal(repository.data.state.leads[0].attempts, 0);
+  leads.save(user.id, {
+    ...created,
+    result: 'No responde',
+    outcome: 'Sin respuesta',
+    due: '2026-09-18T12:00:00Z',
+  });
+  assert.equal(repository.data.state.leads[0].firstContactAt, null);
+  leads.save(user.id, {
+    ...created,
+    result: 'Conversamos',
+    outcome: 'Contacto efectivo',
+    due: '2026-09-18T12:00:00Z',
+  });
+  const first = repository.data.state.leads[0].firstContactAt;
+  assert.equal(first, new Date(now).toISOString());
+  now += 3600000;
+  leads.save(user.id, {
+    ...created,
+    result: 'Responde por correo',
+    outcome: 'Respuesta recibida',
+    due: '2026-09-18T12:00:00Z',
+  });
+  assert.equal(repository.data.state.leads[0].firstContactAt, first);
+  assert.equal(repository.data.state.leads[0].lastContactAt, new Date(now).toISOString());
+  assert.equal(repository.data.state.history[0].outcome, 'Respuesta recibida');
   repository.data.users[0].active = false;
   assert.throws(
     () => queries.snapshot(user.id),

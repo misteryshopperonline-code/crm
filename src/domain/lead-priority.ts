@@ -1,17 +1,14 @@
+import { addBusinessHours, defaultCalendar } from './business-calendar';
 import type { Lead } from './models';
 import { urgency } from './leads';
 
 export type AttentionGroup = 'all' | 'weekend' | 'first' | 'followup';
-export function leadPriority(lead: Lead, now = Date.now()) {
+export function leadPriority(lead: Lead, now = Date.now(), calendar = defaultCalendar) {
   const state = urgency(lead, now);
-  const managed = Boolean(
-    lead.last ||
-    lead.attempts > 0 ||
-    ['Contactado', 'Calificado', 'Propuesta'].includes(lead.stage),
-  );
+  const managed = Boolean(lead.firstContactAt);
   // Business calendar for this first release; independent of the operator's device.
   const weekday = Number.isFinite(Date.parse(lead.created))
-    ? new Intl.DateTimeFormat('en-US', { timeZone: 'America/Guayaquil', weekday: 'short' }).format(
+    ? new Intl.DateTimeFormat('en-US', { timeZone: calendar.timeZone, weekday: 'short' }).format(
         new Date(lead.created),
       )
     : '';
@@ -26,12 +23,30 @@ export function leadPriority(lead: Lead, now = Date.now()) {
     if (state === 'missing') add(50, 'Sin próxima acción');
     if (state === 'overdue') add(50, 'Compromiso vencido');
     if (state === 'today') add(20, 'Próxima acción en menos de 24 horas');
-    if (!managed && weekend) add(30, 'Llegó en fin de semana y sigue sin gestión');
-    const age = now - Date.parse(managed ? lead.last || lead.created : lead.created);
-    if (age >= 48 * 3600000)
+    if (!managed && lead.firstContactDue && now > Date.parse(lead.firstContactDue))
+      add(50, 'Plazo de primer contacto vencido');
+    if (!managed && weekend) add(30, 'Llegó en fin de semana y sigue sin contacto efectivo');
+    const age =
+      now -
+      Date.parse(
+        managed ? lead.lastContactAt || lead.firstContactAt || lead.created : lead.created,
+      );
+    if (
+      Number.isFinite(age) &&
+      now >=
+        addBusinessHours(
+          Date.parse(
+            managed ? lead.lastContactAt || lead.firstContactAt || lead.created : lead.created,
+          ),
+          48,
+          calendar,
+        )
+    )
       add(
         20,
-        managed ? 'Más de 48 horas sin gestión' : 'Más de 48 horas esperando primera gestión',
+        managed
+          ? 'Más de 48 horas sin contacto efectivo'
+          : 'Más de 48 horas esperando primer contacto efectivo',
       );
     if (lead.stage === 'Calificado' || lead.stage === 'Propuesta')
       add(15, `Estado comercial: ${lead.stage}`);
@@ -42,12 +57,21 @@ export function leadPriority(lead: Lead, now = Date.now()) {
     state !== 'closed' &&
     (state === 'overdue' ||
       state === 'missing' ||
-      (!managed && (weekend || now - Date.parse(lead.created) >= 48 * 3600000)) ||
+      (!managed && !!lead.firstContactDue && now > Date.parse(lead.firstContactDue)) ||
+      (!managed &&
+        (weekend ||
+          (Number.isFinite(Date.parse(lead.created)) &&
+            now >= addBusinessHours(Date.parse(lead.created), 48, calendar)))) ||
       (managed && state === 'today'));
   return { score, label, reasons, weekend, managed, alert, state };
 }
-export function matchesAttention(lead: Lead, group: AttentionGroup, now = Date.now()) {
-  const priority = leadPriority(lead, now);
+export function matchesAttention(
+  lead: Lead,
+  group: AttentionGroup,
+  now = Date.now(),
+  calendar = defaultCalendar,
+) {
+  const priority = leadPriority(lead, now, calendar);
   if (group === 'all') return true;
   if (priority.state === 'closed') return false;
   if (group === 'weekend') return priority.weekend && !priority.managed;

@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
-import { channels, stages, type Lead } from '@/domain/models';
+import { addBusinessHours } from '@/domain/business-calendar';
+import { contactOutcomes, channels, stages, type Lead } from '@/domain/models';
 import { useCrm } from '../hooks/crm-context';
 import { AsyncForm, Field, Select, dateLabel, values } from '../components/forms';
 export function OwnerSelect({ label = 'Responsable', value }: { label?: string; value?: string }) {
@@ -19,12 +20,19 @@ export function OwnerSelect({ label = 'Responsable', value }: { label?: string; 
 export function LeadForm({ lead, onDone }: { lead?: Lead; onDone: () => void }) {
   const { data, mutate } = useCrm();
   const [nextDate] = useState(() => {
-    const date = new Date(Date.now() + data.settings.sla * 3600000);
+    const date = new Date(addBusinessHours(Date.now(), data.settings.sla, data.settings.calendar));
     return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
   });
   return (
     <>
       <p>Completa los datos y deja definido el próximo paso.</p>
+      {lead && (
+        <p>
+          Primer contacto efectivo:{' '}
+          {lead.firstContactAt ? dateLabel(lead.firstContactAt) : 'Sin confirmar'}
+          {lead.firstContactDue ? ` · Límite inicial: ${dateLabel(lead.firstContactDue)}` : ''}
+        </p>
+      )}
       <AsyncForm
         label={lead ? 'Guardar gestión y siguiente paso' : 'Crear lead'}
         onSubmit={async (form) => {
@@ -90,10 +98,24 @@ export function LeadForm({ lead, onDone }: { lead?: Lead; onDone: () => void }) 
           />
         </div>
         {lead && (
-          <label>
-            Resultado de esta gestión
-            <textarea name="result" required placeholder="¿Qué ocurrió en el contacto?" />
-          </label>
+          <>
+            <Select label="Resultado del contacto" name="outcome" required defaultValue="">
+              <option value="" disabled>
+                Selecciona el resultado
+              </option>
+              {contactOutcomes.map((outcome) => (
+                <option key={outcome}>{outcome}</option>
+              ))}
+            </Select>
+            <p>
+              Solo “Contacto efectivo” y “Respuesta recibida” confirman el primer contacto. El
+              historial anterior se conserva sin inferir respuestas.
+            </p>
+            <label>
+              Detalle de esta gestión
+              <textarea name="result" required placeholder="¿Qué ocurrió en el contacto?" />
+            </label>
+          </>
         )}
       </AsyncForm>
       {lead && (
@@ -106,6 +128,7 @@ export function LeadForm({ lead, onDone }: { lead?: Lead; onDone: () => void }) 
                 <p key={item.id}>
                   <small>
                     {dateLabel(item.date)} · {item.owner}
+                    {item.outcome ? ` · ${item.outcome}` : ''}
                   </small>
                   <br />
                   {item.text}

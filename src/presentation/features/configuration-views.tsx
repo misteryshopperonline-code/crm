@@ -1,11 +1,13 @@
 'use client';
 import { useState } from 'react';
+import { defaultCalendar } from '@/domain/business-calendar';
 import type { Integration, RequiredField } from '@/domain/models';
 import { useCrm } from '../hooks/crm-context';
 import { Modal, PageTitle, AsyncForm, Field, values } from '../components/forms';
 export function SettingsView() {
   const { data, mutate } = useCrm(),
     [saved, setSaved] = useState(false);
+  const calendar = data.settings.calendar || defaultCalendar;
   const required: [RequiredField, string][] = [
     ['company', 'Empresa'],
     ['email', 'Correo'],
@@ -22,7 +24,20 @@ export function SettingsView() {
         <AsyncForm
           label="Guardar configuración"
           onSubmit={async (form) => {
-            await mutate('settings', { ...values(form), required: form.getAll('required') });
+            await mutate('settings', {
+              ...values(form),
+              required: form.getAll('required'),
+              calendar: {
+                enabled: form.get('calendarEnabled') === 'on',
+                timeZone: String(form.get('timeZone')),
+                weekdays: form.getAll('weekdays').map(Number),
+                startHour: Number(form.get('startHour')),
+                endHour: Number(form.get('endHour')),
+                holidays: String(form.get('holidays') || '')
+                  .split(/[\s,]+/)
+                  .filter(Boolean),
+              },
+            });
             setSaved(true);
           }}
         >
@@ -35,7 +50,7 @@ export function SettingsView() {
           />
           <Field label="Sector" name="industry" required defaultValue={data.settings.industry} />
           <Field
-            label="Tiempo máximo para primer contacto (horas)"
+            label="Plazo para primer contacto (horas; hábiles si activas el calendario)"
             name="sla"
             type="number"
             min={1}
@@ -43,6 +58,63 @@ export function SettingsView() {
             required
             defaultValue={data.settings.sla}
           />
+          <h2>Calendario de atención</h2>
+          <label className="check">
+            <input type="checkbox" name="calendarEnabled" defaultChecked={calendar.enabled} />
+            Calcular el plazo en horas hábiles
+          </label>
+          <Field
+            label="Zona horaria IANA"
+            name="timeZone"
+            required
+            defaultValue={calendar.timeZone}
+            placeholder="America/Guayaquil"
+          />
+          <fieldset>
+            <legend>Días laborables</legend>
+            {['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'].map(
+              (day, index) => (
+                <label className="check" key={day}>
+                  <input
+                    type="checkbox"
+                    name="weekdays"
+                    value={index}
+                    defaultChecked={calendar.weekdays.includes(index)}
+                  />
+                  {day}
+                </label>
+              ),
+            )}
+          </fieldset>
+          <div className="form-grid">
+            <Field
+              label="Hora de apertura (0–23)"
+              name="startHour"
+              type="number"
+              min={0}
+              max={23}
+              required
+              defaultValue={calendar.startHour}
+            />
+            <Field
+              label="Hora de cierre (1–24)"
+              name="endHour"
+              type="number"
+              min={1}
+              max={24}
+              required
+              defaultValue={calendar.endHour}
+            />
+          </div>
+          <label>
+            Feriados (AAAA-MM-DD, uno por línea)
+            <textarea name="holidays" defaultValue={calendar.holidays.join('\n')} />
+          </label>
+          <p>
+            Se aplica a nuevos plazos y fechas sugeridas. No modifica compromisos existentes. Sin
+            activar el calendario, el plazo usa horas transcurridas. Se admite una jornada continua
+            por día.
+          </p>
           <h2>Calidad de los datos</h2>
           <p>
             Nombre, responsable, estado y un medio de contacto son obligatorios. Todo lead abierto

@@ -1,3 +1,5 @@
+import { calendarError } from '../domain/business-calendar';
+import type { BusinessCalendar } from '../domain/models';
 import { reject } from '../domain/errors';
 import type { Input, RequiredField } from '../domain/models';
 import { requireAdmin } from '../domain/permissions';
@@ -41,7 +43,18 @@ export class ConfigurationService {
         input.required.some((key) => !['company', 'email', 'phone'].includes(key))
       )
         reject('validation', 'Revisa negocio, sector, campos y SLA (1–720 horas).');
+      const calendar =
+        input.calendar === undefined
+          ? data.state.settings.calendar
+          : (input.calendar as BusinessCalendar);
+      if (calendar !== undefined) {
+        if (!calendar || typeof calendar !== 'object')
+          reject('validation', 'Calendario no válido.');
+        const error = calendarError(calendar);
+        if (error) reject('validation', error);
+      }
       data.state.settings = {
+        ...(calendar ? { calendar } : {}),
         business,
         industry,
         sla,

@@ -1,3 +1,5 @@
+import { addBusinessHours } from '../domain/business-calendar';
+import { contactOutcomes, type ContactOutcome } from '../domain/models';
 import { reject } from '../domain/errors';
 import { validateLead, isDuplicate } from '../domain/leads';
 import type { Input, Lead } from '../domain/models';
@@ -21,7 +23,22 @@ export class LeadService {
         reject('forbidden', 'Selecciona un responsable activo dentro de tu alcance.');
       if (old && old.ownerId !== ownerId)
         reject('validation', 'Usa Reasignar para cambiar el responsable.');
+      const outcome = text(input.outcome) as ContactOutcome;
+      if (old && (!outcome || !(contactOutcomes as readonly string[]).includes(outcome)))
+        reject('validation', 'Selecciona el resultado del contacto.');
+      const effective = old && ['Contacto efectivo', 'Respuesta recibida'].includes(outcome);
+      const date = new Date(this.deps.now()).toISOString();
       const lead: Lead = {
+        firstContactAt: old?.firstContactAt || (effective ? date : null),
+        lastContactAt: effective ? date : old?.lastContactAt || null,
+        ...(old ? { lastOutcome: outcome } : {}),
+        firstContactDue:
+          old?.firstContactDue ||
+          (old
+            ? undefined
+            : new Date(
+                addBusinessHours(this.deps.now(), state.settings.sla, state.settings.calendar),
+              ).toISOString()),
         id: old?.id || this.deps.id(),
         name: text(input.name),
         company: text(input.company),
@@ -41,7 +58,7 @@ export class LeadService {
       };
       if (!old && state.rules.find((rule) => rule.id === 'first')?.enabled) {
         lead.action ||= 'Primer contacto';
-        lead.due ||= new Date(this.deps.now() + state.settings.sla * 3600000).toISOString();
+        lead.due ||= lead.firstContactDue || '';
       }
       const errors = validateLead(lead, state.settings, this.deps.now());
       if (errors.length) reject('validation', errors.join(' '));
@@ -59,6 +76,7 @@ export class LeadService {
         leadId: lead.id,
         date: new Date(this.deps.now()).toISOString(),
         text: old ? result : 'Lead creado',
+        ...(old ? { outcome } : {}),
         owner: actor.name,
         actorId: actor.id,
       });

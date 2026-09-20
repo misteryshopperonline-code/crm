@@ -226,7 +226,13 @@ test('authentication, isolation and user lifecycle over HTTP', { timeout: 60000 
     );
     const updated = await call(
       'leads',
-      { ...payload, id: leadId, ownerId: execA.user.id, result: 'Managed by supervisor' },
+      {
+        ...payload,
+        id: leadId,
+        ownerId: execA.user.id,
+        outcome: 'Sin respuesta',
+        result: 'Managed by supervisor',
+      },
       supervisor.cookie,
     );
     assert.equal(updated.status, 200);

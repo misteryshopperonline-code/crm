@@ -11,7 +11,7 @@ export function LeadNotifications() {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<Lead | null>(null);
   const alerts = data.leads
-    .map((lead) => ({ lead, priority: leadPriority(lead) }))
+    .map((lead) => ({ lead, priority: leadPriority(lead, data.asOf, data.settings.calendar) }))
     .filter((item) => item.priority.alert)
     .sort((a, b) => b.priority.score - a.priority.score);
   return (
@@ -66,7 +66,7 @@ export function LeadNotifications() {
                     </strong>
                     <span>{priority.reasons.join(' · ')}</span>
                     <span>
-                      {priority.managed ? 'Continuar seguimiento' : 'Realizar primera gestión'} →
+                      {priority.managed ? 'Continuar seguimiento' : 'Realizar primer contacto'} →
                     </span>
                   </button>
                 ))

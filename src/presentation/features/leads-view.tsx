@@ -25,11 +25,13 @@ export function LeadsView({ directory = false }: { directory?: boolean }) {
     .filter(
       (lead) =>
         (directory || urgency(lead) !== 'closed') &&
-        (directory ? stage === 'all' || lead.stage === stage : matchesAttention(lead, attention)) &&
+        (directory
+          ? stage === 'all' || lead.stage === stage
+          : matchesAttention(lead, attention, data.asOf, data.settings.calendar)) &&
         (directory ||
           filter !== 'all' ||
           ['today', 'overdue', 'missing'].includes(urgency(lead)) ||
-          leadPriority(lead).alert) &&
+          leadPriority(lead, data.asOf, data.settings.calendar).alert) &&
         (filter === 'all' || urgency(lead) === filter) &&
         `${lead.name} ${lead.company} ${lead.owner} ${lead.email} ${lead.phone}`
           .toLowerCase()
@@ -38,7 +40,8 @@ export function LeadsView({ directory = false }: { directory?: boolean }) {
     .sort((a, b) =>
       directory
         ? a.name.localeCompare(b.name, 'es')
-        : leadPriority(b).score - leadPriority(a).score ||
+        : leadPriority(b, data.asOf, data.settings.calendar).score -
+            leadPriority(a, data.asOf, data.settings.calendar).score ||
           (Date.parse(a.due) || 0) - (Date.parse(b.due) || 0),
     );
   const filters: [Urgency | 'all', string][] = [
@@ -79,9 +82,9 @@ export function LeadsView({ directory = false }: { directory?: boolean }) {
             {(
               [
                 ['all', 'Toda la atención pendiente'],
-                ['weekend', 'Fin de semana sin gestionar'],
-                ['first', 'Sin primera gestión'],
-                ['followup', 'Ya gestionados'],
+                ['weekend', 'Fin de semana sin contacto'],
+                ['first', 'Sin contacto efectivo'],
+                ['followup', 'Con contacto efectivo'],
               ] as [AttentionGroup, string][]
             ).map(([key, label]) => (
               <button
@@ -98,8 +101,8 @@ export function LeadsView({ directory = false }: { directory?: boolean }) {
                     data.leads.filter(
                       (lead) =>
                         (['today', 'overdue', 'missing'].includes(urgency(lead)) ||
-                          leadPriority(lead).alert) &&
-                        matchesAttention(lead, key),
+                          leadPriority(lead, data.asOf, data.settings.calendar).alert) &&
+                        matchesAttention(lead, key, data.asOf, data.settings.calendar),
                     ).length
                   }
                 </strong>
@@ -110,9 +113,11 @@ export function LeadsView({ directory = false }: { directory?: boolean }) {
             <summary>¿Cómo se ordenan las prioridades?</summary>
             <p>
               50 puntos por vencimiento o falta de próximo paso; 30 por llegada en fin de semana sin
-              gestión; 20 por acción en próximas 24 horas y 20 por más de 48 horas sin gestión; 15
-              por estado Calificado o Propuesta; 5 por correo y teléfono disponibles. Alta: desde
-              50; media: desde 20. Calendario: Ecuador continental. Los cerrados no generan alertas.
+              gestión; 20 por acción en próximas 24 horas y 20 por más de 48 horas sin contacto
+              (hábiles si el calendario está activo); 15 por estado Calificado o Propuesta; 5 por
+              correo y teléfono disponibles. Alta: desde 50; media: desde 20. Calendario: zona
+              horaria y horario configurados en el negocio. El plazo de primer contacto vencido suma
+              50 puntos adicionales. Los cerrados no generan alertas.
             </p>
           </details>
           <div className="metrics">
@@ -204,15 +209,22 @@ export function LeadsView({ directory = false }: { directory?: boolean }) {
                   {!directory && (
                     <>
                       <span
-                        className={`priority-badge priority-${leadPriority(lead).label.toLowerCase()}`}
-                        title={leadPriority(lead).reasons.join(' · ')}
+                        className={`priority-badge priority-${leadPriority(lead, data.asOf, data.settings.calendar).label.toLowerCase()}`}
+                        title={leadPriority(lead, data.asOf, data.settings.calendar).reasons.join(
+                          ' · ',
+                        )}
                       >
-                        Prioridad {leadPriority(lead).label.toLowerCase()} ·{' '}
-                        {leadPriority(lead).score}
+                        Prioridad{' '}
+                        {leadPriority(lead, data.asOf, data.settings.calendar).label.toLowerCase()}{' '}
+                        · {leadPriority(lead, data.asOf, data.settings.calendar).score}
                       </span>
                       <p>
-                        {leadPriority(lead).managed ? 'Ya gestionado' : 'Sin primera gestión'}
-                        {leadPriority(lead).weekend ? ' · Llegó en fin de semana' : ''}
+                        {leadPriority(lead, data.asOf, data.settings.calendar).managed
+                          ? 'Contacto confirmado'
+                          : 'Sin contacto efectivo'}
+                        {leadPriority(lead, data.asOf, data.settings.calendar).weekend
+                          ? ' · Llegó en fin de semana'
+                          : ''}
                       </p>
                     </>
                   )}
@@ -294,7 +306,7 @@ export function LeadsView({ directory = false }: { directory?: boolean }) {
       </div>
       {!directory && (
         <div className="footnote">
-          ◷ Las prioridades se calculan con la fecha y hora de este dispositivo.
+          ◷ Las prioridades usan la hora del servidor y el calendario del negocio.
         </div>
       )}
       {detail && (

@@ -32,6 +32,7 @@ export class QueryService {
       const visible = new Set(leads.map((lead) => lead.id));
       return {
         ...data.state,
+        asOf: this.deps.now(),
         leads,
         history: data.state.history.filter((item) => visible.has(item.leadId)),
         integrations: admin ? data.state.integrations : [],
